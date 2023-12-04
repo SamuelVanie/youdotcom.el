@@ -37,17 +37,17 @@
 
 (defun youchat-format-message (message)
   "Format a MESSAGE as a string for display."
-  (let ((role (alist-get 'role message))
-        (content (alist-get 'content message)))
-    (format "%s: %s\n" (capitalize role) content)))
+  (let ((role (cdr (assoc "role" message)))
+        (content (cdr (assoc "content" message))))
+    (message "The content is: %s\n" content)
+    (format "%s: %s\n" role content)))
 
 (defun youchat-display-messages (messages)
   "Display the MESSAGES in the chat buffer."
-  (message messages)
   (with-current-buffer (get-buffer-create youchat-buffer-name)
     (erase-buffer)
     (dolist (message messages)
-      (insert (youchat-format-message message))) ;; call the format function for each message
+      (insert (youchat-format-message message)))
     (goto-char (point-max))))
 
 (defun youchat-send-message (content)
@@ -56,14 +56,29 @@
                         (lambda (status)
                           (goto-char (point-min))
                           (re-search-forward "^$")
-                          (let* ((json-object-type 'alist)
+                          (let* ((json-object-type 'alist) ;; convert the json object to lisp's lists
                                  (json-array-type 'list)
                                  (json-key-type 'symbol)
                                  (json (json-read))
                                  (hits (alist-get 'hits json))
-                                 (message (car hits)))
+                                 (response "")) ;; empty string that will collect all the results
+			    (dolist (hit hits)
+			      (let ((description (alist-get 'description hit)) ;; get each hit and the different field and concatenate them in a readable format :
+				    ;; - The World's Greatest Search Engine
+				    ;; Search on YDC
+				    ;; I'm an AI assistant that helps you get more done. What can I help you with ?
+				    ;; https://you.com
+				    ;;
+				    ;; - You.com - Wikipedia
+				    ;; You.com is a search engine and artificial intelligence platform that aims to provide users with personalized and relevant information
+				    ;; and services. It was founded in 2020 by a team of former Google engineers and researchers.
+				    ;; https://en.wikipedia.org/wiki/You.com
+				    (snippets (alist-get 'snippets hit))
+				    (title (alist-get 'title hit))
+				    (url (alist-get 'url hit)))
+				(setq response (concat response  "-" (format "%s" title) "\n" (format "%s" description) "\n" (format "%s" (car snippets )) "\n" (format "%s" url) "\n\n")))) ;; this format info extractions is based on how the answer is given in the api, it should be fixed if the response change
                             (youchat-display-messages `((("role" . "user") ("content" . ,content))
-                                                        (("role" . "assistant") ("content" . ,(alist-get 'snippets message)))))))))
+                                                        (("role" . "assistant") ("content" . ,response))))))))
 
 (defun youchat-start ()
   "Start a chat session with the You.com/chat AI model."
@@ -73,7 +88,7 @@
 
 (define-derived-mode youchat-mode fundamental-mode "YouChat"
   "A major mode for chatting with the You.com/chat AI model."
-  (read-only-mode 1)
+  (read-only-mode -1)
   (local-set-key (kbd "RET") 'youchat-enter))
 
 (defun youchat-enter ()
