@@ -16,10 +16,16 @@
 (defvar youchat-buffer-name "*YouChat*"
   "The name of the buffer for chatting with the You.com/chat AI model.")
 
-;; (defcustom youchat-api-endpoint "https://api.ydc-index.io/search?query=%s"
-;;   "Default API endpoint for the Youdotcom chat api"
-;;   :type 'string
-;;   :group 'youchat)
+(defcustom youchat-number-of-results "1"
+  "The number of results that the api should return"
+  :type 'string
+  :group 'youchat)
+
+
+(defcustom youchat-base-api-endpoint "https://api.ydc-index.io/search"
+  "The base url of the you.com api for the search functionalities"
+  :type 'string
+  :group 'youchat)
 
 (defun youchat-send-request (query callback)
   "Send a request to the You.com/chat AI model with the given QUERY and CALLBACK."
@@ -27,7 +33,7 @@
         (url-request-extra-headers
          `(("X-API-Key" . ,youchat-api-key)))
         (url-request-data nil))
-    (url-retrieve (format "https://api.ydc-index.io/search?query=%s" query) callback)))
+    (url-retrieve (format "%s?query=%s&num_web_results=%s" youchat-base-api-endpoint query youchat-number-of-results) callback)))
 
 (defun youchat-format-message (message)
   "Format a MESSAGE as a string for display."
