@@ -46,7 +46,7 @@
   "Display the MESSAGES in the chat buffer."
   (with-current-buffer (get-buffer-create youchat-buffer-name)
     (goto-char (point-max))
-    (dolist (message messages)
+    (dolist
       (insert (youchat-format-message message)))
     (goto-char (point-max))))
 
