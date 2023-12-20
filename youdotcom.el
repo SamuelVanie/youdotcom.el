@@ -5,7 +5,7 @@
 (require 'cl-lib)
 
 (defgroup youchat nil
-  "A package for chatting with the You.com/search AI model inside Emacs."
+  "A package to make quick searches on you.com"
   :group 'applications)
 
 (defcustom youchat-api-key ""
@@ -14,7 +14,7 @@
   :group 'youchat)
 
 (defvar youchat-buffer-name "*YouChat*"
-  "The name of the buffer for chatting with the You.com/search AI model.")
+  "The name of the buffer for the YouChat session.")
 
 (defcustom youchat-number-of-results "1"
   "The number of results that the api should return"
@@ -28,7 +28,7 @@
   :group 'youchat)
 
 (defun youchat-send-request (query callback)
-  "Send a request to the You.com/chat AI model with the given QUERY and CALLBACK."
+  "Send a request to the You.com's API with the given QUERY and CALLBACK."
   (let ((url-request-method "GET")
         (url-request-extra-headers
          `(("X-API-Key" . ,youchat-api-key)))
@@ -51,7 +51,7 @@
     (goto-char (point-max))))
 
 (defun youchat-send-message (content)
-  "Send a message with the given CONTENT to the You.com/search AI model and display the response."
+  "Send a message with the given CONTENT to the You.com's API model and display the response."
   (youchat-send-request content
                         (lambda (status)
                           (goto-char (point-min))
@@ -84,7 +84,7 @@
   "Variable to track whether the YouChat session has started")
 
 (defun youchat-start ()
-  "Start a chat session with the You.com/search AI model."
+  "Start a search session"
   (interactive)
   (let ((buf (get-buffer youchat-buffer-name)))
     (if buf
@@ -99,7 +99,7 @@
 
 
 (define-derived-mode youchat-mode fundamental-mode "YouChat"
-  "A major mode for chatting with the You.com/search AI model."
+  "A major mode for searching on the web with the You.com/search API"
   (read-only-mode -1)
   (local-set-key (kbd "RET") 'youchat-enter)
   (youchat-enter))
