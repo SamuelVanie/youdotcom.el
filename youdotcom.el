@@ -39,7 +39,6 @@
   "Format a MESSAGE as a string for display."
   (let ((role (cdr (assoc "role" message)))
         (content (cdr (assoc "content" message))))
-    (message "The content is: %s\n" content)
     (format "%s: %s\n" role content)))
 
 (defun youchat-display-messages (messages)
