@@ -5,7 +5,7 @@
 (require 'cl-lib)
 
 (defgroup youchat nil
-  "A package for chatting with the You.com/chat AI model inside Emacs."
+  "A package for chatting with the You.com/search AI model inside Emacs."
   :group 'applications)
 
 (defcustom youchat-api-key ""
@@ -14,7 +14,7 @@
   :group 'youchat)
 
 (defvar youchat-buffer-name "*YouChat*"
-  "The name of the buffer for chatting with the You.com/chat AI model.")
+  "The name of the buffer for chatting with the You.com/search AI model.")
 
 (defcustom youchat-number-of-results "1"
   "The number of results that the api should return"
@@ -45,13 +45,13 @@
 (defun youchat-display-messages (messages)
   "Display the MESSAGES in the chat buffer."
   (with-current-buffer (get-buffer-create youchat-buffer-name)
-    (erase-buffer)
+    (point-max)
     (dolist (message messages)
       (insert (youchat-format-message message)))
     (goto-char (point-max))))
 
 (defun youchat-send-message (content)
-  "Send a message with the given CONTENT to the You.com/chat AI model and display the response."
+  "Send a message with the given CONTENT to the You.com/search AI model and display the response."
   (youchat-send-request content
                         (lambda (status)
                           (goto-char (point-min))
@@ -76,20 +76,22 @@
 				    (snippets (alist-get 'snippets hit))
 				    (title (alist-get 'title hit))
 				    (url (alist-get 'url hit)))
-				(setq response (concat response  "-" (format "%s" title) "\n" (format "%s" description) "\n" (format "%s" (car snippets )) "\n" (format "%s" url) "\n\n")))) ;; this format info extractions is based on how the answer is given in the api, it should be fixed if the response change
+				(setq response (concat response  "\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (car snippets)) "\n\n" (format "%s" url) "\n")))) ;; this format info extractions is based on how the answer is given in the api, it should be fixed if the response change
                             (youchat-display-messages `((("role" . "user") ("content" . ,content))
                                                         (("role" . "assistant") ("content" . ,response))))))))
 
 (defun youchat-start ()
-  "Start a chat session with the You.com/chat AI model."
+  "Start a chat session with the You.com/search AI model."
   (interactive)
   (switch-to-buffer (get-buffer-create youchat-buffer-name))
-  (youchat-mode))
+  (youchat-mode)
+  (with-current-buffer youchat-buffer-name (markdown-mode)))
 
 (define-derived-mode youchat-mode fundamental-mode "YouChat"
-  "A major mode for chatting with the You.com/chat AI model."
+  "A major mode for chatting with the You.com/search AI model."
   (read-only-mode -1)
-  (local-set-key (kbd "RET") 'youchat-enter))
+  (local-set-key (kbd "RET") 'youchat-enter)
+  (youchat-enter))
 
 (defun youchat-enter ()
   "Enter a message or a command."
