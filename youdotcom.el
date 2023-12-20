@@ -80,6 +80,9 @@
                             (youchat-display-messages `((("role" . "user") ("content" . ,content))
                                                         (("role" . "assistant") ("content" . ,response))))))))
 
+(defvar youchat-session-started nil
+  "Variable to track whether the YouChat session has started")
+
 (defun youchat-start ()
   "Start a chat session with the You.com/search AI model."
   (interactive)
@@ -91,6 +94,7 @@
       (switch-to-buffer buf)
       (youchat-mode)
       (with-current-buffer youchat-buffer-name (markdown-mode)))
+    (setq youchat-session-started t)
     (youchat-enter)))
 
 
@@ -103,12 +107,16 @@
 (defun youchat-enter ()
   "Enter a message or a command."
   (interactive)
+  (if youchat-session-started
   (let ((input (read-string "> ")))
     (cond ((string-equal input "/quit")
-           (kill-buffer youchat-buffer-name))
+           (kill-buffer youchat-buffer-name)
+	   (setq youchat-session-started nil))
           ((string-equal input "/clear")
            (erase-buffer))
           ((string-equal input "/help")
            (message "Available commands: /quit, /clear, /help"))
           (t
-           (youchat-send-message input)))))
+	   (switch-to-buffer (get-buffer youchat-buffer-name))
+           (youchat-send-message input))))
+  (message "YouChat session not started. Call `youchat-start` first.")))
