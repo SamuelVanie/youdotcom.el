@@ -83,9 +83,16 @@
 (defun youchat-start ()
   "Start a chat session with the You.com/search AI model."
   (interactive)
-  (switch-to-buffer (get-buffer-create youchat-buffer-name))
-  (youchat-mode)
-  (with-current-buffer youchat-buffer-name (markdown-mode)))
+  (let ((buf (get-buffer youchat-buffer-name)))
+    (if buf
+        (switch-to-buffer buf)
+      (setq buf (get-buffer-create youchat-buffer-name))
+      (split-window-sensibly)
+      (switch-to-buffer buf)
+      (youchat-mode)
+      (with-current-buffer youchat-buffer-name (markdown-mode)))
+    (youchat-enter)))
+
 
 (define-derived-mode youchat-mode fundamental-mode "YouChat"
   "A major mode for chatting with the You.com/search AI model."
