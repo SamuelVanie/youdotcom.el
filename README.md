@@ -16,8 +16,8 @@ Pretty neat alternative to eww in emacs.
 ## ❓ Why?
 
 I wanted to use Youdotcom search engine from Emacs, so I wrote this package.
-The You API is very simple and cheap to use, so I thought it would be a alternative for people who still want to use a search engine instead of chatbots.
-You will no more need to filter the results by yourself on the web and directly get the results inside of Eamcs without leaving it.
+The You API is very simple and cheap to use, so I thought it would be an alternative for people who still want to use a search engine instead of chatbots.
+You will no more need to filter the results by yourself on the web and directly get the results inside of Emacs without leaving it.
 
 You can also use it as a simple web browser, but this is not the spirit of an emacs user, right ?
 
@@ -55,7 +55,6 @@ In the prompt, you can use the following commands:
 - `/quit` : Stop the search engine's session and close the buffer.
 
 You can change the number of results displayed by changing the variable `youdotcom-number-of-results` (default is 1).
-The result buffer is based on *markdown*, make sure your emacs supports it.
 
 ## 👊 Contributing
 
