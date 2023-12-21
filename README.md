@@ -9,7 +9,7 @@ Pretty neat alternative to eww in emacs.
 *N.B: Remember that Youdotcom search is a search engine not a chatbot.*
 
 <p align="center">
-  <img alt="demo" src="./assets/demo_2.gif">
+  <img alt="demo" src="./demo_2.gif">
 </p>
 
 
