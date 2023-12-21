@@ -45,9 +45,9 @@
   "Display the MESSAGES in the chat buffer."
   (with-current-buffer (get-buffer-create youchat-buffer-name)
     (goto-char (point-max))
-    (dolist
+    (dolist (message messages)
       (insert (youchat-format-message message)))
-    (goto-char (point-max))))
+    (goto-char (point-min))))
 
 (defun youchat-send-message (content)
   "Send a message with the given CONTENT to the You.com's API model and display the response."
@@ -91,8 +91,7 @@
       (setq buf (get-buffer-create youchat-buffer-name))
       (split-window-sensibly)
       (switch-to-buffer buf)
-      (youchat-mode)
-      (with-current-buffer youchat-buffer-name (markdown-mode)))
+      (youchat-mode))
     (setq youchat-session-started t)
     (youchat-enter)))
 
