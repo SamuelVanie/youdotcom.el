@@ -1,4 +1,19 @@
-;; -*- lexical-binding: t; -*-
+;;; youdotcom.el --- You.com search in Emacs
+
+;; Copyright (C) 2023 Free Software Foundation, Inc.
+
+;; Author: Samuel Michael Vanié <samuelmichaelvanie@gmail.com>
+;; Version: 0.1
+;; Keywords: ai, you.com, search, assistant
+;; URL: https://github.com/SamuelVanie/youdotcom.el
+
+;;; Commentary:
+
+;; This package provides an interactive interface to You.com's search API
+
+;;; Code:
+
+;; user facing functionality prefixed youdotcom-, developer oriented API prefixed youdotcom-
 
 (require 'json)
 (require 'url)
