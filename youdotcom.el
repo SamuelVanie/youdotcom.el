@@ -4,54 +4,54 @@
 (require 'url)
 (require 'cl-lib)
 
-(defgroup youchat nil
+(defgroup youdotcom nil
   "A package to make quick searches on you.com"
   :group 'applications)
 
-(defcustom youchat-api-key ""
+(defcustom youdotcom-api-key ""
   "Your secret API key for You.com."
   :type 'string
-  :group 'youchat)
+  :group 'youdotcom)
 
-(defvar youchat-buffer-name "*YouChat*"
-  "The name of the buffer for the YouChat session.")
+(defvar youdotcom-buffer-name "*Youdotcom*"
+  "The name of the buffer for the Youdotcom session.")
 
-(defcustom youchat-number-of-results "1"
+(defcustom youdotcom-number-of-results "1"
   "The number of results that the api should return"
   :type 'string
-  :group 'youchat)
+  :group 'Youdotcom)
 
 
-(defcustom youchat-base-api-endpoint "https://api.ydc-index.io/search"
+(defcustom youdotcom-base-api-endpoint "https://api.ydc-index.io/search"
   "The base url of the you.com api for the search functionalities"
   :type 'string
-  :group 'youchat)
+  :group 'youdotcom)
 
-(defun youchat-send-request (query callback)
+(defun youdotcom-send-request (query callback)
   "Send a request to the You.com's API with the given QUERY and CALLBACK."
   (let ((url-request-method "GET")
         (url-request-extra-headers
-         `(("X-API-Key" . ,youchat-api-key)))
+         `(("X-API-Key" . ,youdotcom-api-key)))
         (url-request-data nil))
-    (url-retrieve (format "%s?query=%s&num_web_results=%s" youchat-base-api-endpoint query youchat-number-of-results) callback)))
+    (url-retrieve (format "%s?query=%s&num_web_results=%s" youdotcom-base-api-endpoint query youdotcom-number-of-results) callback)))
 
-(defun youchat-format-message (message)
+(defun youdotcom-format-message (message)
   "Format a MESSAGE as a string for display."
   (let ((role (cdr (assoc "role" message)))
         (content (cdr (assoc "content" message))))
     (format "%s: %s\n" role content)))
 
-(defun youchat-display-messages (messages)
+(defun youdotcom-display-messages (messages)
   "Display the MESSAGES in the chat buffer."
-  (with-current-buffer (get-buffer-create youchat-buffer-name)
+  (with-current-buffer (get-buffer-create youdotcom-buffer-name)
     (goto-char (point-max))
     (dolist (message messages)
-      (insert (youchat-format-message message)))
+      (insert (youdotcom-format-message message)))
     (goto-char (point-min))))
 
-(defun youchat-send-message (content)
+(defun youdotcom-send-message (content)
   "Send a message with the given CONTENT to the You.com's API model and display the response."
-  (youchat-send-request content
+  (youdotcom-send-request content
                         (lambda (status)
                           (goto-char (point-min))
                           (re-search-forward "^$")
@@ -76,45 +76,45 @@
 				    (title (alist-get 'title hit))
 				    (url (alist-get 'url hit)))
 				(setq response (concat response  "\n\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (mapconcat 'identity snippets "\n")) "\n\n" (format "%s" url) "\n")))) ;; this format info extractions is based on how the answer is given in the api, it should be fixed if the response change
-                            (youchat-display-messages `((("role" . "user") ("content" . ,content))
+                            (youdotcom-display-messages `((("role" . "user") ("content" . ,content))
                                                         (("role" . "assistant") ("content" . ,response))))))))
 
-(defvar youchat-session-started nil
-  "Variable to track whether the YouChat session has started")
+(defvar youdotcom-session-started nil
+  "Variable to track whether the Youdotcom session has started")
 
-(defun youchat-start ()
+(defun youdotcom-start ()
   "Start a search session"
   (interactive)
-  (let ((buf (get-buffer youchat-buffer-name)))
+  (let ((buf (get-buffer youdotcom-buffer-name)))
     (if buf
         (switch-to-buffer buf)
-      (setq buf (get-buffer-create youchat-buffer-name))
+      (setq buf (get-buffer-create youdotcom-buffer-name))
       (split-window-sensibly)
       (switch-to-buffer buf)
-      (youchat-mode))
-    (setq youchat-session-started t)
-    (youchat-enter)))
+      (youdotcom-mode))
+    (setq youdotcom-session-started t)
+    (youdotcom-enter)))
 
 
-(define-derived-mode youchat-mode fundamental-mode "YouChat"
+(define-derived-mode youdotcom-mode fundamental-mode "Youdotcom"
   "A major mode for searching on the web with the You.com/search API"
   (read-only-mode -1)
-  (local-set-key (kbd "RET") 'youchat-enter)
-  (youchat-enter))
+  (local-set-key (kbd "RET") 'youdotcom-enter)
+  (youdotcom-enter))
 
-(defun youchat-enter ()
+(defun youdotcom-enter ()
   "Enter a message or a command."
   (interactive)
-  (if youchat-session-started
+  (if youdotcom-session-started
   (let ((input (read-string "> ")))
     (cond ((string-equal input "/quit")
-           (kill-buffer youchat-buffer-name)
-	   (setq youchat-session-started nil))
+           (kill-buffer youdotcom-buffer-name)
+	   (setq youdotcom-session-started nil))
           ((string-equal input "/clear")
            (erase-buffer))
           ((string-equal input "/help")
            (message "Available commands: /quit, /clear, /help"))
           (t
-	   (switch-to-buffer (get-buffer youchat-buffer-name))
-           (youchat-send-message input))))
-  (message "YouChat session not started. Call `youchat-start` first.")))
+	   (switch-to-buffer (get-buffer youdotcom-buffer-name))
+           (youdotcom-send-message input))))
+  (message "Youdotcom session not started. Call `youdotcom-start` first.")))
