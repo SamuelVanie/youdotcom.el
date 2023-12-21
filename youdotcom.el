@@ -77,22 +77,13 @@
                                  (json-key-type 'symbol)
                                  (json (json-read))
                                  (hits (alist-get 'hits json))
-                                 (response "")) ;; empty string that will collect all the results
+                                 (response ""))
 			    (dolist (hit hits)
-			      (let ((description (alist-get 'description hit)) ;; get each hit and the different field and concatenate them in a readable format :
-				    ;; - The World's Greatest Search Engine
-				    ;; Search on YDC
-				    ;; I'm an AI assistant that helps you get more done. What can I help you with ?
-				    ;; https://you.com
-				    ;;
-				    ;; - You.com - Wikipedia
-				    ;; You.com is a search engine and artificial intelligence platform that aims to provide users with personalized and relevant information
-				    ;; and services. It was founded in 2020 by a team of former Google engineers and researchers.
-				    ;; https://en.wikipedia.org/wiki/You.com
+			      (let ((description (alist-get 'description hit))
 				    (snippets (alist-get 'snippets hit))
 				    (title (alist-get 'title hit))
 				    (url (alist-get 'url hit)))
-				(setq response (concat response  "\n\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (mapconcat 'identity snippets "\n")) "\n\n" (format "%s" url) "\n")))) ;; this format info extractions is based on how the answer is given by the api, it should be fixed if the response change
+				(setq response (concat response  "\n\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (mapconcat 'identity snippets "\n")) "\n\n" (format "%s" url) "\n")))) ;; REVIEW: this info extractions is based on how the answer is given by the api, it should be fixed if the response change
                             (youdotcom-display-messages `((("role" . "user") ("content" . ,content))
                                                         (("role" . "assistant") ("content" . ,response))))))))
 
