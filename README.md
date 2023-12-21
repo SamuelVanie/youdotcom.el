@@ -3,10 +3,10 @@
 
 # youdotcom.el
 
-A simple package to use YouChat search engine from Emacs.
+A simple package to use Youdotcom search engine from Emacs.
 Pretty neat alternative to eww in emacs.
 
-*N.B: Remember that YouChat search is a search engine not a chatbot.*
+*N.B: Remember that Youdotcom search is a search engine not a chatbot.*
 
 <p align="center">
   <img alt="demo" src="./assets/demo.gif">
@@ -15,13 +15,13 @@ Pretty neat alternative to eww in emacs.
 
 ## ❓ Why?
 
-I wanted to use YouChat search engine from Emacs, so I wrote this package.
-The YouChat API is very simple and cheap to use, so I thought it would be a alternative for people who still want to use a search engine instead of chatbots.
+I wanted to use Youdotcom search engine from Emacs, so I wrote this package.
+The You API is very simple and cheap to use, so I thought it would be a alternative for people who still want to use a search engine instead of chatbots.
 You will no more need to filter the results by yourself on the web and directly get the results inside of Eamcs without leaving it.
 
 You can also use it as a simple web browser, but this is not the spirit of an emacs user, right ?
 
-*N.B: Do not forget to check the pricing of the YouChat search engine API.*
+*N.B: Do not forget to check the pricing of the You search engine API.*
 
 ## 💾 Installation
 
@@ -31,7 +31,7 @@ You can use `package-install-file` for example.
 
 ## 🔑 Obtaining an API key
 
-You need to obtain an API key from [YouChat](https://api.you.com/).
+You need to obtain an API key from [You.com](https://api.you.com/).
 Go to that website and get the Web Search API key, the Web LLM integration is not yet supported (I'm planning to add it in the future).
 
 
@@ -40,13 +40,13 @@ Go to that website and get the Web Search API key, the Web LLM integration is no
 You will have to set the API key in your init file:
 
 ```elisp
-(setq youchat-api-key "YOUR_API_KEY")
+(setq youdotcom-api-key "YOUR_API_KEY")
 ```
 
 Then you can use the following commands:
 
-- `youchat-start` : Will start the search engine's session and ask you for a query.
-- `youchat-enter` : Will open the prompt and the buffer to enter the query.
+- `youdotcom-start` : Will start the search engine's session and ask you for a query.
+- `youdotcom-enter` : Will open the prompt and the buffer to enter the query.
 
 In the prompt, you can use the following commands:
 
@@ -54,7 +54,7 @@ In the prompt, you can use the following commands:
 - `/clear` : Will clear the buffer.
 - `/quit` : Stop the search engine's session and close the buffer.
 
-You can change the number of results displayed by changing the variable `youchat-number-of-results` (default is 1).
+You can change the number of results displayed by changing the variable `youdotcom-number-of-results` (default is 1).
 The result buffer is based on *markdown*, make sure your emacs supports it.
 
 ## 👊 Contributing
