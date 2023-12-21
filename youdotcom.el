@@ -4,7 +4,7 @@
 
 ;; Author: Samuel Michael Vanié <samuelmichaelvanie@gmail.com>
 ;; Version: 0.1
-;; Keywords: ai, you.com, search, assistant
+;; Keywords: ai, you.com, search, assistant, eww, web, internet
 ;; URL: https://github.com/SamuelVanie/youdotcom.el
 
 ;;; Commentary:
@@ -15,12 +15,14 @@
 
 ;; user facing functionality prefixed youdotcom-, developer oriented API prefixed youdotcom-
 
+;; -*- lexical-binding: t; -*-
+
 (require 'json)
 (require 'url)
 (require 'cl-lib)
 
 (defgroup youdotcom nil
-  "A package to make quick searches on you.com"
+  "A package to make quick searches on you.com."
   :group 'applications)
 
 (defcustom youdotcom-api-key ""
@@ -32,13 +34,13 @@
   "The name of the buffer for the Youdotcom session.")
 
 (defcustom youdotcom-number-of-results "1"
-  "The number of results that the api should return"
+  "The number of results that the api should return."
   :type 'string
   :group 'Youdotcom)
 
 
 (defcustom youdotcom-base-api-endpoint "https://api.ydc-index.io/search"
-  "The base url of the you.com api for the search functionalities"
+  "The base url of the you.com api for the search functionalities."
   :type 'string
   :group 'youdotcom)
 
@@ -65,7 +67,7 @@
     (goto-char (point-min))))
 
 (defun youdotcom-send-message (content)
-  "Send a message with the given CONTENT to the You.com's API model and display the response."
+  "Send a message with CONTENT to the You.com's API model and display the response."
   (youdotcom-send-request content
                         (lambda (status)
                           (goto-char (point-min))
@@ -90,15 +92,15 @@
 				    (snippets (alist-get 'snippets hit))
 				    (title (alist-get 'title hit))
 				    (url (alist-get 'url hit)))
-				(setq response (concat response  "\n\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (mapconcat 'identity snippets "\n")) "\n\n" (format "%s" url) "\n")))) ;; this format info extractions is based on how the answer is given in the api, it should be fixed if the response change
+				(setq response (concat response  "\n\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (mapconcat 'identity snippets "\n")) "\n\n" (format "%s" url) "\n")))) ;; this format info extractions is based on how the answer is given by the api, it should be fixed if the response change
                             (youdotcom-display-messages `((("role" . "user") ("content" . ,content))
                                                         (("role" . "assistant") ("content" . ,response))))))))
 
 (defvar youdotcom-session-started nil
-  "Variable to track whether the Youdotcom session has started")
+  "Variable to track whether the Youdotcom session has started.")
 
 (defun youdotcom-start ()
-  "Start a search session"
+  "Start a search session."
   (interactive)
   (let ((buf (get-buffer youdotcom-buffer-name)))
     (if buf
@@ -112,7 +114,7 @@
 
 
 (define-derived-mode youdotcom-mode fundamental-mode "Youdotcom"
-  "A major mode for searching on the web with the You.com/search API"
+  "A major mode for searching on the web with the You.com/search API."
   (read-only-mode -1)
   (local-set-key (kbd "RET") 'youdotcom-enter)
   (youdotcom-enter))
@@ -133,3 +135,6 @@
 	   (switch-to-buffer (get-buffer youdotcom-buffer-name))
            (youdotcom-send-message input))))
   (message "Youdotcom session not started. Call `youdotcom-start` first.")))
+
+(provide 'youdotcom)
+;;; youdotcom.el ends here
