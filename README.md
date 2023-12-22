@@ -23,10 +23,27 @@ You can also use it as a simple web browser, but this is not the spirit of an em
 
 *N.B: Do not forget to check the pricing of the You search engine API.*
 
+
 ## 💾 Installation
 
-The package is not yet available on MELPA, so you have to install it manually.
-You can use `package-install-file` for example.
+### Straigt
+
+```elisp
+(use-package youdotcom
+  :straight (youdotcom :type git :host github :repo "SamuelVanie/youdotcom.el"))
+```
+
+### Doom Emacs
+
+```elisp
+(package! youdotcom
+  :recipe (:host github :repo "SamuelVanie/youdotcom.el"))
+```
+
+
+### MELPA
+
+To be done...
 
 
 ## 🔑 Obtaining an API key
