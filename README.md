@@ -54,7 +54,7 @@ In the prompt, you can use the following commands:
 - `/clear` : Will clear the buffer.
 - `/quit` : Stop the search engine's session and close the buffer.
 
-You can change the number of results displayed by changing the variable `youdotcom-number-of-results` (default is 1).
+*NB: You can change the number of results displayed by changing the variable `youdotcom-number-of-results` (default is 1).*
 
 ## 👊 Contributing
 
