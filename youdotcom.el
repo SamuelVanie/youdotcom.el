@@ -1,10 +1,9 @@
-;; -*- lexical-binding: t; -*-
-;;; youdotcom.el --- You.com search in Emacs
+;;; youdotcom.el --- You.com search in Emacs -*- lexical-binding: t; -*-
 
 ;; Author: Samuel Michael Vanié <samuelmichaelvanie@gmail.com>
 ;; Version: 0.1
 ;; Package-requires: ((emacs "25.1"))
-;; Keywords: ai, assistant, search
+;; Keywords: ai, tools
 ;; URL: https://github.com/SamuelVanie/youdotcom.el
 
 ;;; Commentary:
@@ -48,7 +47,11 @@
         (url-request-extra-headers
          `(("X-API-Key" . ,youdotcom-api-key)))
         (url-request-data nil))
-    (url-retrieve (format "%s?query=%s&num_web_results=%s" youdotcom-base-api-endpoint query youdotcom-number-of-results) callback)))
+    (url-retrieve (format "%s?query=%s&num_web_results=%s" 
+                          youdotcom-base-api-endpoint 
+                          query 
+                          youdotcom-number-of-results)
+                  callback)))
 
 (defun youdotcom-format-message (message)
   "Format a MESSAGE as a string for display."
@@ -67,23 +70,34 @@
 (defun youdotcom-send-message (content)
   "Send a message with CONTENT to the You.com's API model and display the response."
   (youdotcom-send-request content
-                        (lambda (status)
-                          (goto-char (point-min))
-                          (re-search-forward "^$")
-                          (let* ((json-object-type 'alist) ;; convert the json object to lisp's lists
-                                 (json-array-type 'list)
-                                 (json-key-type 'symbol)
-                                 (json (json-read))
-                                 (hits (alist-get 'hits json))
-                                 (response ""))
-			    (dolist (hit hits)
-			      (let ((description (alist-get 'description hit))
-				    (snippets (alist-get 'snippets hit))
-				    (title (alist-get 'title hit))
-				    (url (alist-get 'url hit)))
-				(setq response (concat response  "\n\n# Title: " (format "%s" title) "\n\n" (format "## Description : %s" description) "\n\n" (format "%s" (mapconcat 'identity snippets "\n")) "\n\n" (format "%s" url) "\n")))) ;; REVIEW: this info extractions is based on how the answer is given by the api, it should be fixed if the response change
-                            (youdotcom-display-messages `((("role" . "user") ("content" . ,content))
-                                                        (("role" . "assistant") ("content" . ,response))))))))
+    (lambda (status)
+        (goto-char (point-min))
+        (re-search-forward "^$")
+        (let* ((json-object-type 'alist)
+                (json-array-type 'list)
+                (json-key-type 'symbol)
+                (json (json-read))
+                (hits (alist-get 'hits json))
+                (response ""))
+        (dolist (hit hits)
+            (let ((description (alist-get 'description hit))
+                (snippets (alist-get 'snippets hit))
+                (title (alist-get 'title hit))
+                (url (alist-get 'url hit)))
+              (setq response (concat response "\n\n# Title: " 
+                                     (format "%s" title) "\n\n" 
+                    (format "## Description : %s" description) 
+                    "\n\n" (format "%s" (mapconcat #'identity snippets "\n"))
+                    "\n\n" (format "%s" url) "\n"))))
+        ;; REVIEW: this info extractions
+        ;; is based on how the answer is given by the
+        ;; api, it should be fixed if the response
+        ;; change
+            (youdotcom-display-messages
+                `((("role" . "user")
+                ("content" . ,content))
+                (("role" . "assistant")
+                ("content" . ,response))))))))
 
 (defvar youdotcom-session-started nil
   "Variable to track whether the Youdotcom session has started.")
