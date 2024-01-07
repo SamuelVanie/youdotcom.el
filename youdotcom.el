@@ -1,4 +1,4 @@
-;;; youdotcom.el --- You.com search in Emacs -*- lexical-binding: t; -*-
+;;; youdotcom.el --- You.com search package -*- lexical-binding: t; -*-
 
 ;; Author: Samuel Michael Vanié <samuelmichaelvanie@gmail.com>
 ;; Version: 0.1
@@ -22,7 +22,7 @@
   "A package to make quick searches on you.com."
   :group 'applications)
 
-(defcustom youdotcom-api-key ""
+(defcustom youdotcom-api-key "1b674f83-5400-44cf-96eb-81a3e9944cb2<__>1OHyzyETU8N2v5f4A8MSTZoG"
   "Your secret API key for You.com."
   :type 'string
   :group 'youdotcom)
@@ -47,9 +47,9 @@
         (url-request-extra-headers
          `(("X-API-Key" . ,youdotcom-api-key)))
         (url-request-data nil))
-    (url-retrieve (format "%s?query=%s&num_web_results=%s" 
-                          youdotcom-base-api-endpoint 
-                          query 
+    (url-retrieve (format "%s?query=%s&num_web_results=%s"
+                          youdotcom-base-api-endpoint
+                          query
                           youdotcom-number-of-results)
                   callback)))
 
@@ -70,7 +70,7 @@
 (defun youdotcom-send-message (content)
   "Send a message with CONTENT to the You.com's API model and display the response."
   (youdotcom-send-request content
-    (lambda (status)
+    (lambda ()
         (goto-char (point-min))
         (re-search-forward "^$")
         (let* ((json-object-type 'alist)
@@ -84,9 +84,9 @@
                 (snippets (alist-get 'snippets hit))
                 (title (alist-get 'title hit))
                 (url (alist-get 'url hit)))
-              (setq response (concat response "\n\n# Title: " 
-                                     (format "%s" title) "\n\n" 
-                    (format "## Description : %s" description) 
+              (setq response (concat response "\n\n# Title: "
+                                     (format "%s" title) "\n\n"
+                    (format "## Description : %s" description)
                     "\n\n" (format "%s" (mapconcat #'identity snippets "\n"))
                     "\n\n" (format "%s" url) "\n"))))
         ;; REVIEW: this info extractions
