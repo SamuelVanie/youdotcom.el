@@ -22,7 +22,7 @@
   "A package to make quick searches on you.com."
   :group 'applications)
 
-(defcustom youdotcom-api-key "1b674f83-5400-44cf-96eb-81a3e9944cb2<__>1OHyzyETU8N2v5f4A8MSTZoG"
+(defcustom youdotcom-api-key ""
   "Your secret API key for You.com."
   :type 'string
   :group 'youdotcom)
