@@ -48,7 +48,7 @@
                           youdotcom-base-api-endpoint
                           query
                           youdotcom-number-of-results)
-                  (lambda (status)
+                  (lambda ()
                     (funcall callback query)))))
 
 (defun youdotcom-format-message (message)
@@ -65,8 +65,8 @@
       (insert (youdotcom-format-message message)))
     (goto-char (point-min))))
 
-(defun parse-youdotcom-response (json)
-  "Parse the JSON response from You.com's API"
+(defun youdotcom-parse-response (json)
+  "Parse the JSON response from You.com's API."
   (let* ((hits (alist-get 'hits json))
          (response ""))
     (dolist (hit hits)
@@ -82,30 +82,31 @@
     response))
 
 
-(defun format-youdotcom-answer (content response)
-  "Use a particular object format to display results to user"
+(defun youdotcom-format-answer (query response)
+  "Format user's QUERY and the API's RESPONSE for easy display."
   (youdotcom-display-messages
    `((("role" . "user")
-      ("content" . ,content))
+      ("content" . ,query))
      (("role" . "assistant")
       ("content" . ,response)))))
 
-(defun handle-youdotcom-response (content)
+(defun youdotcom-handle-response (content)
+  "Extract the CONTENT from the API's response and change it to elisp list."
   (goto-char (point-min))
   (re-search-forward "^$")
   (let* ((json-object-type 'alist)
          (json-array-type 'list)
          (json-key-type 'symbol)
          (json (json-read))
-         (response (parse-youdotcom-response json)))
+         (response (youdotcom-parse-response json)))
     ;; REVIEW: This info extractions
     ;; is based on how the answers of the API are structured
     ;; it should be changed if the response changes
-    (format-youdotcom-answer content response)))
+    (youdotcom-format-answer content response)))
 
 (defun youdotcom-send-message (content)
-  "Send a message with CONTENT and display the response"
-  (youdotcom-send-request content #'handle-youdotcom-response))
+  "Send a message with CONTENT and display the response."
+  (youdotcom-send-request content #'youdotcom-handle-response))
 
 
 (defvar youdotcom-session-started nil
