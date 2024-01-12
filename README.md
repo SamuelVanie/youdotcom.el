@@ -62,8 +62,8 @@ You will have to set the API key in your init file:
 
 Then you can use the following commands:
 
-- `youdotcom-start` : Will start the search engine's session and ask you for a query.
-- `youdotcom-enter` : Will open the prompt and the buffer to enter the query.
+- `youdotcom-enter` : Will start the client and open the prompt for you to enter your query.
+The default keybinding is `C-c y` for this command, but you can change it.
 
 In the prompt, you can use the following commands:
 
