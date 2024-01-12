@@ -63,7 +63,7 @@ You will have to set the API key in your init file:
 Then you can use the following commands:
 
 - `youdotcom-enter` : Will start the client and open the prompt for you to enter your query.
-The default keybinding is `C-c y` for this command, but you can change it.
+You can setup a keybinding for this command. (e.g. `(global-set-key (kbd "C-c y") 'youdotcom-enter)`)
 
 In the prompt, you can use the following commands:
 
