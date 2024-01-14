@@ -125,8 +125,6 @@
     (setq youdotcom-session-started t)
     (youdotcom-start)))
 
-(global-set-key (kbd "C-c y") 'youdotcom-enter)
-
 (define-derived-mode youdotcom-mode fundamental-mode "Youdotcom"
   "A major mode for searching on the web with the You.com/search API."
   (read-only-mode -1)
