@@ -51,7 +51,7 @@
                   (lambda ()
                     (funcall callback query)))))
 
-(defun youdotcom-format-message (message)
+(defun format-youdotcom-message (message)
   "Format a MESSAGE as a string for display."
   (let ((role (cdr (assoc "role" message)))
         (content (cdr (assoc "content" message))))
