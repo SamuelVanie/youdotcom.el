@@ -52,11 +52,11 @@
         (url-request-extra-headers
          `(("X-API-Key" . ,youdotcom-api-key)))
         (url-request-data nil))
-    (setq url (format "%s?query=%s&num_web_results=%d"
+    (url-retrieve (format "%s?query=%s&num_web_results=%d"
                           youdotcom-base-api-endpoint
                           (url-hexify-string query)
-                          youdotcom-number-of-results))
-    (url-retrieve url callback (list query))))
+                          youdotcom-number-of-results)
+                  callback (list query))))
 
 (defun youdotcom-format-message (message)
   "Format a MESSAGE as a string for display."
@@ -68,9 +68,9 @@
   "Display the MESSAGES in the chat buffer."
   (with-current-buffer (get-buffer-create youdotcom-buffer-name)
     (goto-char (point-max))
-    (setq question (pop messages))
-    (insert (youdotcom-format-message question))
-    (add-face-text-property (point-min) (point-max) '(:foreground "red"))
+    (let ((current-point (point)))
+        (insert (youdotcom-format-message (pop messages)))
+        (add-face-text-property current-point (point-max) '(:foreground "red")))
     (dolist (message messages)
       (insert (youdotcom-format-message message)))
     (goto-char (point-min))))
@@ -101,7 +101,8 @@
       ("content" . ,response)))))
 
 (defun youdotcom-handle-response (status content)
-  "Extract the CONTENT from the API's response and change it to elisp list."
+  "Extract CONTENT from the response and change it to elisp list.STATUS, ignored."
+  (ignore status)
   (goto-char (point-min))
   (re-search-forward "^$")
   (let* ((json-object-type 'alist)
