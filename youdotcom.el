@@ -38,18 +38,25 @@
 (defconst youdotcom-base-api-endpoint "https://api.ydc-index.io/search"
   "The base url of the you.com api for the search functionalities.")
 
+(defun youdotcom-verify-payload ()
+  "Verify that the payload is valid."
+  (unless (and (not (string-empty-p youdotcom-api-key))
+               (not (string-empty-p youdotcom-base-api-endpoint))
+               (> youdotcom-number-of-results 0))
+    (error "Invalid arguments or global variables")))
+
 (defun youdotcom-send-request (query callback)
   "Send a request to the You.com's API with the given QUERY and CALLBACK."
+  (youdotcom-verify-payload)
   (let ((url-request-method "GET")
         (url-request-extra-headers
          `(("X-API-Key" . ,youdotcom-api-key)))
         (url-request-data nil))
-    (url-retrieve (format "%s?query=%s&num_web_results=%d"
+    (setq url (format "%s?query=%s&num_web_results=%d"
                           youdotcom-base-api-endpoint
-                          query
-                          youdotcom-number-of-results)
-                  (lambda ()
-                    (funcall callback query)))))
+                          (url-hexify-string query)
+                          youdotcom-number-of-results))
+    (url-retrieve url callback (list query))))
 
 (defun youdotcom-format-message (message)
   "Format a MESSAGE as a string for display."
@@ -61,6 +68,9 @@
   "Display the MESSAGES in the chat buffer."
   (with-current-buffer (get-buffer-create youdotcom-buffer-name)
     (goto-char (point-max))
+    (setq question (pop messages))
+    (insert (youdotcom-format-message question))
+    (add-face-text-property (point-min) (point-max) '(:foreground "red"))
     (dolist (message messages)
       (insert (youdotcom-format-message message)))
     (goto-char (point-min))))
@@ -90,7 +100,7 @@
      (("role" . "assistant")
       ("content" . ,response)))))
 
-(defun youdotcom-handle-response (content)
+(defun youdotcom-handle-response (status content)
   "Extract the CONTENT from the API's response and change it to elisp list."
   (goto-char (point-min))
   (re-search-forward "^$")
