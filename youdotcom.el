@@ -21,10 +21,21 @@
   "A package to make quick searches on you.com."
   :group 'applications)
 
-(defcustom youdotcom-api-key ""
-  "Your secret API key for You.com."
+(defcustom youdotcom-search-api-key ""
+  "Your secret API key for Search endpoint on api.you.com."
   :type 'string
   :group 'youdotcom)
+
+(defcustom youdotcom-rag-api-key ""
+  "Your secret API key for rag endpoint on api.you.com."
+  :type 'string
+  :group 'youdotcom)
+
+(defun youdotcom-get-api-key (type)
+  "Get the API key for the given TYPE."
+  (if (string= type "search")
+      youdotcom-search-api-key
+    youdotcom-rag-api-key))
 
 (defvar youdotcom-buffer-name "*Youdotcom*"
   "The name of the buffer for the Youdotcom session.")
@@ -35,21 +46,39 @@
   :group 'youdotcom)
 
 
-(defconst youdotcom-base-api-endpoint "https://api.ydc-index.io/search"
+(defconst youdotcom-base-api-endpoint "https://api.ydc-index.io/"
   "The base url of the you.com api for the search functionalities.")
 
-(defun youdotcom-send-request (query callback)
-  "Send a request to the You.com's API with the given QUERY and CALLBACK."
+(defun youdotcom-build-url (query type)
+  "Build a URL for the You.com's API with the given QUERY and TYPE."
+  (if (string= type "search")
+      (format "%ssearch?query=%s&num_web_results=%d"
+              youdotcom-base-api-endpoint
+              (url-hexify-string query)
+              youdotcom-number-of-results)
+    (if (string= type "rag")
+    (format "%srag?query=%s"
+            youdotcom-base-api-endpoint
+            (url-hexify-string query)))))
+
+(defun youdotcom-verify-payload ()
+  "Verify that the payload is valid."
+  (unless (and (or (not (string-empty-p youdotcom-search-api-key))
+                   (not (string-empty-p youdotcom-rag-api-key)))
+               (not (string-empty-p youdotcom-base-api-endpoint))
+               (> youdotcom-number-of-results 0))
+    (error "Invalid arguments or global variables")))
+
+(defun youdotcom-send-request (query type callback)
+  "Send a request of TYPE to the API with the given QUERY and CALLBACK."
+  (youdotcom-verify-payload)
   (let ((url-request-method "GET")
         (url-request-extra-headers
-         `(("X-API-Key" . ,youdotcom-api-key)))
+         `(("X-API-Key" . ,(youdotcom-get-api-key type))
+           ("Content-Type" . "application/json")))
         (url-request-data nil))
-    (url-retrieve (format "%s?query=%s&num_web_results=%d"
-                          youdotcom-base-api-endpoint
-                          query
-                          youdotcom-number-of-results)
-                  (lambda ()
-                    (funcall callback query)))))
+    (url-retrieve (youdotcom-build-url query type)
+                  callback (list query type))))
 
 (defun youdotcom-format-message (message)
   "Format a MESSAGE as a string for display."
@@ -61,12 +90,23 @@
   "Display the MESSAGES in the chat buffer."
   (with-current-buffer (get-buffer-create youdotcom-buffer-name)
     (goto-char (point-max))
+    (let ((current-point (point)))
+        (insert (youdotcom-format-message (pop messages)))
+        (add-face-text-property current-point (point-max) '(:foreground "red")))
     (dolist (message messages)
       (insert (youdotcom-format-message message)))
+    (insert "\n")
     (goto-char (point-min))))
 
-(defun youdotcom-parse-response (json)
-  "Parse the JSON response from You.com's API."
+(defun youdotcom-parse-response (json type)
+  "Parse JSON response from the API for the given TYPE."
+  (if (string= type "search")
+      (youdotcom-parse-search-response json)
+    (if (string= type "rag")
+        (youdotcom-parse-rag-response json))))
+
+(defun youdotcom-parse-search-response (json)
+  "Parse JSON response if called from the search endpoint."
   (let* ((hits (alist-get 'hits json))
          (response ""))
     (dolist (hit hits)
@@ -81,6 +121,13 @@
                                "\n\n" (format "%s" url) "\n"))))
     response))
 
+(defun youdotcom-parse-rag-response (json)
+  "Parse JSON response if called from the rag endpoint."
+  (let* ((answer (alist-get 'answer json))
+         (response ""))
+    (setq response answer)
+    response))
+
 
 (defun youdotcom-format-answer (query response)
   "Format user's QUERY and the API's RESPONSE for easy display."
@@ -90,23 +137,24 @@
      (("role" . "assistant")
       ("content" . ,response)))))
 
-(defun youdotcom-handle-response (content)
-  "Extract the CONTENT from the API's response and change it to elisp list."
+(defun youdotcom-handle-response (status content type)
+  "Extract CONTENT from the response and change it to elisp list.STATUS, ignored."
+  (ignore status)
   (goto-char (point-min))
   (re-search-forward "^$")
   (let* ((json-object-type 'alist)
          (json-array-type 'list)
          (json-key-type 'symbol)
          (json (json-read))
-         (response (youdotcom-parse-response json)))
+         (response (youdotcom-parse-response json type)))
     ;; REVIEW: This info extractions
     ;; is based on how the answers of the API are structured
     ;; it should be changed if the response changes
     (youdotcom-format-answer content response)))
 
-(defun youdotcom-send-message (content)
-  "Send a message with CONTENT and display the response."
-  (youdotcom-send-request content #'youdotcom-handle-response))
+(defun youdotcom-send-message (content type)
+  "Send a message with CONTENT and display the response depending on TYPE."
+  (youdotcom-send-request content type #'youdotcom-handle-response))
 
 
 (defvar youdotcom-session-started nil
@@ -131,21 +179,29 @@
   (youdotcom-enter))
 
 (defun youdotcom-start ()
-  "Enter a message or a command."
+  "Enter the command followed by the query."
   (if youdotcom-session-started
-  (let ((input (read-string "> ")))
-    (cond ((string-equal input "/quit")
-           (kill-buffer youdotcom-buffer-name)
-	   (setq youdotcom-session-started nil))
-          ((string-equal input "/clear")
-           (erase-buffer))
-          ((string-equal input "/help")
-           (message "Available commands: /quit, /clear, /help"))
-          (t
-	   (switch-to-buffer (get-buffer youdotcom-buffer-name))
-           (youdotcom-send-message input))))
-  (message "Youdotcom session not started.")))
-
+      (let ((input (read-string "> ")))
+        (let ((command (car (split-string input)))
+              (query (mapconcat #'identity (cdr (split-string input)) " ")))
+          (cond ((string-equal command "/quit")
+                 (kill-buffer youdotcom-buffer-name)
+                 (setq youdotcom-session-started nil))
+                ((string-equal command "/clear")
+                 (erase-buffer))
+                ((string-equal command "/help")
+                 (message "Commands: /quit, /clear, /help, /search, /rag"))
+                ((string-equal command "/search")
+                 (if (string-empty-p query)
+                     (message "Please provide a query")
+                   (youdotcom-send-message query "search")))
+                ((string-equal command "/rag")
+                 (if (string-empty-p query)
+                     (message "Please provide a query")
+                   (youdotcom-send-message query "rag")))
+                (t
+                 (message "Invalid command. type /help for available commands.")))))
+    (message "Youdotcom session not started.")))
 
 (provide 'youdotcom)
 ;;; youdotcom.el ends here
