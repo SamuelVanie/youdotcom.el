@@ -63,13 +63,14 @@
 
 (defun youdotcom-verify-payload ()
   "Verify that the payload is valid."
-  (unless (and (not (string-empty-p youdotcom-search-api-key))
+  (unless (and (or (not (string-empty-p youdotcom-search-api-key))
+                   (not (string-empty-p youdotcom-rag-api-key)))
                (not (string-empty-p youdotcom-base-api-endpoint))
                (> youdotcom-number-of-results 0))
     (error "Invalid arguments or global variables")))
 
 (defun youdotcom-send-request (query type callback)
-  "Send a request to the You.com's API with the given QUERY and CALLBACK."
+  "Send a request of TYPE to the API with the given QUERY and CALLBACK."
   (youdotcom-verify-payload)
   (let ((url-request-method "GET")
         (url-request-extra-headers
@@ -94,6 +95,7 @@
         (add-face-text-property current-point (point-max) '(:foreground "red")))
     (dolist (message messages)
       (insert (youdotcom-format-message message)))
+    (insert "\n")
     (goto-char (point-min))))
 
 (defun youdotcom-parse-response (json type)
@@ -151,7 +153,7 @@
     (youdotcom-format-answer content response)))
 
 (defun youdotcom-send-message (content type)
-  "Send a message with CONTENT and display the response."
+  "Send a message with CONTENT and display the response depending on TYPE."
   (youdotcom-send-request content type #'youdotcom-handle-response))
 
 
